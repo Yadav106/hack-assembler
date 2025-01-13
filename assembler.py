@@ -39,6 +39,8 @@ class Assembler:
 
         output = "\n".join(self.machine_code)
         print(output)
+        with open("output.txt", "w") as f:
+            f.write(output)
         return output
 
     def parse(self):
@@ -78,11 +80,15 @@ class Assembler:
         sym = match.group(1)
         if not sym.isnumeric():
             sym = self.symbols.get(sym)
-        print(f"Found {sym} for instruction {ip}")
+
+        if sym is None:
+            print(f"Error : Found none for symbol in {ip}")
+            return
 
         symbin = "{0:b}".format(int(sym))
 
-        print("0" + ((15 - len(str(symbin))) * "0") + str(symbin))
+        a_instr = "0" + ((15 - len(str(symbin))) * "0") + str(symbin)
+        self.machine_code.append(a_instr)
 
     def parse_C_instr(self, ip):
         pass

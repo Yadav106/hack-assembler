@@ -1,4 +1,5 @@
 import re
+import pprint
 
 class Assembler:
     def __init__(self, input: str):
@@ -90,9 +91,6 @@ class Assembler:
         self.parse()
 
         output = "\n".join(self.machine_code)
-        print(output)
-        with open("output.txt", "w") as f:
-            f.write(output)
         return output
 
     def parse(self):
@@ -123,13 +121,15 @@ class Assembler:
             
 
     def parse_A_instr(self, ip):
-        regex = "@(\\w+)"
-        match = re.search(regex, ip)
-        if match is None:
-            print(f"Error : no match found at {self.line_number} for instruction {ip}")
-            return
-
-        sym = match.group(1)
+        # regex = "@(\\w+)"
+        # match = re.search(regex, ip)
+        # if match is None:
+        #     print(f"Error : no match found at {self.line_number} for instruction {ip}")
+        #     return
+        #
+        # sym = match.group(1)
+        sym = ip[1:]
+        sym = sym.strip()
         if not sym.isnumeric():
             sym = self.symbols.get(sym)
 
@@ -140,9 +140,11 @@ class Assembler:
         symbin = "{0:b}".format(int(sym))
 
         a_instr = "0" + ((15 - len(str(symbin))) * "0") + str(symbin)
+        # self.machine_code.append(ip + " " + a_instr)
         self.machine_code.append(a_instr)
 
     def parse_C_instr(self, ip):
+        tip = ip
         jump = "-1"
         dest = "-1"
 
@@ -158,6 +160,7 @@ class Assembler:
 
         comp = ip
 
+        # c_instr = tip + " " +"111" + str(self.compbits.get(comp)) + str(self.destbits.get(dest)) + str(self.jumpbits.get(jump))
         c_instr = "111" + str(self.compbits.get(comp)) + str(self.destbits.get(dest)) + str(self.jumpbits.get(jump))
         self.machine_code.append((c_instr))
 
@@ -176,11 +179,12 @@ class Assembler:
 
             if ip[0] == "(":
                 # handle label symbol
-                regex = "\\((\\w+)\\)"
-                match = re.search(regex, ip)
-                if match is None:
-                    continue
-                sym = match.group(1)
+                # regex = "\\((\\w+)\\)"
+                # match = re.search(regex, ip)
+                # if match is None:
+                #     continue
+                # sym = match.group(1)
+                sym = ip[1:-1]
                 self.symbols[sym] = self.line_number
                 continue
 
@@ -208,7 +212,7 @@ class Assembler:
                     self.line_number += 1
                     continue
 
-                sym_regex = "@(\\w+)"
+                sym_regex = "@(\\w+\\.?\\w+)"
                 sym_match = re.search(sym_regex, ip)
                 if sym_match is None:
                     continue
@@ -221,5 +225,6 @@ class Assembler:
             self.line_number += 1
 
         self.line_number = 0
+        pprint.pprint(self.symbols)
 
 
